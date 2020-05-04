@@ -1,0 +1,8 @@
+RMM_observed:
+		This file is getting the RMM from the bureau of Meterology and putting that
+		into a dataframe/ xarray form of the layout: date, phase, amplitude
+RMM_ACCESS-S:
+		This is the RMM from ACCESS-S calulcated by Andrew Marshal. The original files
+		are found in the e-mail from Andrew King and Andrew Marshal. His format was
+		quite weird and thus there is a lot of processing that needed to be done to get 		it into the same format as the observed RMM, in order to be used in 
+		pre-existing functions.

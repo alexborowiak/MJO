@@ -1,0 +1,28 @@
+./extreme_calc/anomalies/int/enso/October 90th Percentile Intensity Anomalies for MJO and ENSO Phases (p<0.05).png
+./extreme_calc/anomalies/int/enso/November 90th Percentile Intensity Anomalies for MJO and ENSO Phases (p<0.05).png
+./extreme_calc/anomalies/int/enso/December 90th Percentile Intensity Anomalies for MJO and ENSO Phases (p<0.05).png
+./extreme_calc/anomalies/int/enso/January 90th Percentile Intensity Anomalies for MJO and ENSO Phases (p<0.05).png
+./extreme_calc/anomalies/int/enso/February 90th Percentile Intensity Anomalies for MJO and ENSO Phases (p<0.05).png
+./extreme_calc/anomalies/int/enso/March 90th Percentile Intensity Anomalies for MJO and ENSO Phases (p<0.05).png
+./extreme_calc/anomalies/int/vanilla/October 90th Percentile Count Anomalies (p<0.05).png
+./extreme_calc/anomalies/int/vanilla/November 90th Percentile Count Anomalies (p<0.05).png
+./extreme_calc/anomalies/int/vanilla/December 90th Percentile Count Anomalies (p<0.05).png
+./extreme_calc/anomalies/int/vanilla/January 90th Percentile Count Anomalies (p<0.05).png
+./extreme_calc/anomalies/int/vanilla/February 90th Percentile Count Anomalies (p<0.05).png
+./extreme_calc/anomalies/int/vanilla/March 90th Percentile Count Anomalies (p<0.05).png
+./extreme_calc/anomalies/sum/mjo and enso/October Proportion Anomalies 90th Percentile (p<0.05) for MJO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/November Proportion Anomalies 90th Percentile (p<0.05) for MJO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/December Proportion Anomalies 90th Percentile (p<0.05) for MJO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/January Proportion Anomalies 90th Percentile (p<0.05) for MJO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/February Proportion Anomalies 90th Percentile (p<0.05) for MJO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/March Proportion Anomalies 90th Percentile (p<0.05) for MJO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/October Proportion Anomalies 95th Percentile (p<0.05) for MJO and ENSO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/November Proportion Anomalies 95th Percentile (p<0.05) for MJO and ENSO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/December Proportion Anomalies 95th Percentile (p<0.05) for MJO and ENSO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/January Proportion Anomalies 95th Percentile (p<0.05) for MJO and ENSO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/February Proportion Anomalies 95th Percentile (p<0.05) for MJO and ENSO Phases.png
+./extreme_calc/anomalies/sum/mjo and enso/March Proportion Anomalies 95th Percentile (p<0.05) for MJO and ENSO Phases.png
+./phase_anomalies_and_trends/images/tcw/Trend in 95th Percentile Total Column Water (TCW) for Phases of the MJO in ERA5 (p < 0.05).png
+./phase_anomalies_and_trends/images/tcw/Trend in 90th Percentile Total Column Water (TCW) for Phases of the MJO in ERA5 (p < 0.05).png
+./phase_anomalies_and_trends/images/tcw/Trend in Mean Total Column Water (TCW) for Phases of the MJO in ERA5 (p < 0.05).png
+./phase_anomalies_and_trends/images/tcw/Percentage Total Column Water (TCW) Changes for Phases of the MJO in ERA5 (p < 0.05).png
