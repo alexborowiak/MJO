@@ -254,4 +254,77 @@ def correlation_plot_single_phase_multi_indinice(data_list_top, titles,phase = '
 
     if savedir != '':
         fig.savefig(savedir + savetitle + '.png', dpi = 150)     
+
         
+        
+def correlation_plot_single_phase_multi_indinice_sig_only(data_list_top, sig_list_top, titles,phase = 'enhanced',
+                                                 vmax = 0.8, step = 0.1,
+                                              savetitle = '', savedir = ''):
+    
+    
+        
+    vmin = -vmax
+    levels = np.arange(vmin, vmax + step, step)
+
+    
+    data_list = []
+    sig_list = []
+    
+    for item1, item2 in zip(data_list_top,sig_list_top):
+        data_list.append(item1.sel(phase = phase))
+        sig_list.append(item2.sel(phase = phase))
+    
+    
+
+    fig = plt.figure(figsize = (20,20))
+    
+    cols = len(data_list)
+    months = data_list[0].month.values
+    rows = len(months)
+    
+    gs = gridspec.GridSpec(rows + 2,cols, height_ratios = [0.2, 0.1] + [1] * rows, hspace = 0.1, wspace = 0.1)
+    
+
+    cmap  = plt.get_cmap('RdBu', len(levels))
+    plt.suptitle(savetitle, fontsize = 15, y = 0.94)
+    
+    for row,month in enumerate([10,11,12,1,2,3]):
+        
+        for col in range(cols):
+        
+            subdata = data_list[col].sel(month = month)
+            sub_sig = sig_list[col].sel(month = month)
+            
+            subdata = subdata.where(sub_sig.precip < 0.1)
+            
+            
+            ax = fig.add_subplot(gs[row + 2, col], projection = ccrs.PlateCarree())
+            pdata = subdata.precip.plot(ax = ax, add_colorbar = False, cmap = cmap, levels = levels, extend = 'neither')#vmin = vmin, vmax = vmax)
+
+            ax.outline_patch.set_visible(False)
+            ax.coastlines(resolution = '50m')
+          
+            if col == 0:
+                ax.annotate(calendar.month_name[month], xy = (-0.12, 0), xycoords = 'axes fraction', 
+                            fontsize = 25, rotation = 90)
+                
+            if row == 0:
+                ax.set_title(titles[col], fontsize  = 25)
+            else:
+                ax.set_title('')
+
+
+
+    axes = plt.subplot(gs[0:cols])
+    import matplotlib as mpl
+    cbar = mpl.colorbar.ColorbarBase( axes,cmap = cmap, orientation = 'horizontal',
+                    ticks  = levels, boundaries = levels)
+    cbar.ax.set_title('Correlation', fontsize = 12.5)
+    
+    # Adding in extra space: not sure why this works, but it does???
+    ax = plt.subplot(gs[0:cols])
+#     ax.spined
+    
+
+    if savedir != '':
+        fig.savefig(savedir + savetitle + '.png', dpi = 600, bbox_inces = 'tight', pad = 0)     

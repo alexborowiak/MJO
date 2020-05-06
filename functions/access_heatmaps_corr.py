@@ -55,11 +55,11 @@ def custom_cmap(levels, add_white = 0, extender = 0):
         white = [1,1,1,1]
 
 
-#         custom_cmap[int(upper_mid)] = white
+        custom_cmap[int(upper_mid)] = white
         custom_cmap[int(lower_mid)] = white
         custom_cmap[int(lower_mid) - 1] = white
     
-    cmap = mpc.LinearSegmentedColormap.from_list("RdWtBu", custom_cmap,len(levels)) 
+    cmap = mpc.LinearSegmentedColormap.from_list("RdWtBu", custom_cmap,len(levels) + 1) 
     # Joingi the colormap back together
     
     
@@ -78,8 +78,8 @@ def corr_heatmap_state_group(data_tot, month_reverse = 0
 
     # The custom cmap is overridden, as the colours didn't matchthe values, and there where some errors with the add_white component
     # Nevertheless, it has been left in incase I need it in the future
-#     cmap = custom_cmap(levels, add_white = add_white)
-    cmap = plt.cm.get_cmap('RdBu', len(levels))
+    cmap = custom_cmap(levels, add_white = add_white)
+#     cmap = plt.cm.get_cmap('RdBu', len(levels) + 1)
 
     fig = plt.figure(figsize = (15, 12))
 
@@ -144,11 +144,10 @@ def corr_heatmap_phase_group(data_tot, month_reverse = 0
     levels = np.arange(vmin, vmax + step, step)
     # The custom cmap is overridden, as the colours didn't matchthe values, and there where some errors with the add_white component
     # Nevertheless, it has been left in incase I need it in the future
-#     cmap = custom_cmap(levels, add_white = add_white)
-    cmap = plt.cm.get_cmap('RdBu', len(levels))
+    cmap = custom_cmap(levels, add_white = add_white)
+#     cmap = plt.cm.get_cmap('RdBu', len(levels) + 1)
 
     fig = plt.figure(figsize = (15, 12))
-
     gs = gridspec.GridSpec(3,2, hspace = 0.7, wspace = 0.4, height_ratios = [0.15,1,1])
 
 
@@ -167,8 +166,6 @@ def corr_heatmap_phase_group(data_tot, month_reverse = 0
         # Making sure the months are in the correct order: not 1,2,3,10,11,12
         if month_reverse:
             plot_vals = np.concatenate([plot_vals[:,3:], plot_vals[:,0:3]], axis = 1)
-
-        # ax.imshow(data, cmap = 'RdBu', vmin = -1, vmax = 1)
 
         sns.heatmap(plot_vals.round(2), ax = ax,
                     cmap = cmap, vmax = vmax, vmin = vmin, cbar = False, 
