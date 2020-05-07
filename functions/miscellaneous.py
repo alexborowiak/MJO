@@ -75,7 +75,7 @@ def apply_masks(data):
     landsea_mask = xr.open_dataset(directory2 + 'mask_landsea.nc')
     landsea_mask = landsea_mask.rename({'longitude':'lon', 'latitude':'lat'})
     landsea_mask = landsea_mask.squeeze().drop('time')
-    data = data.where(landsea_mask.lsm >= 0.6, drop = True)
+    data = data.where(landsea_mask.lsm >= 0.5, drop = True)
     
     
     # the andrew mask for the gibson desert

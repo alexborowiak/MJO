@@ -1067,7 +1067,7 @@ def anomalies_plots_sigle_phase_all_month_era5(count,
 
     
     # Titles
-    plt.suptitle(save_name, fontsize = 30,  y = 1)
+    plt.suptitle(save_name, fontsize = 30,  y = 0.93)
     
     if len(l1) != 0: # This means I am adding my own levels in that I want, nor a preset levels
         vmax = max(l1)
@@ -1113,7 +1113,7 @@ def anomalies_plots_sigle_phase_all_month_era5(count,
                 ax.set_title('')
 
             if col_num == 0:
-                ax.annotate(calendar.month_name[month], xy = (-0.12, 0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
+                ax.annotate(calendar.month_name[month], xy = (-0.12, 0), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
 
 
             col_num += 1
@@ -1121,17 +1121,7 @@ def anomalies_plots_sigle_phase_all_month_era5(count,
             
            
 
- 
-    '''~~~~~~~~~~~~~~~  Seperator between cbar and top plot'''    
-#     axer = fig.add_subplot(gs[1,:], zorder = -100)
-#     axer.spines['top'].set_visible(False)
-#     axer.spines['bottom'].set_visible(False)    
-#     axer.spines['left'].set_visible(False)
-#     axer.spines['right'].set_visible(False)
-#     axer.set_yticklabels('')
-#     axer.set_yticks([])
-#     axer.set_xticklabels('')
-#     axer.set_xticks([])
+
     
     '''~~~~~~~~~~~~~~~  Colorbars'''
     
@@ -1151,9 +1141,9 @@ def anomalies_plots_sigle_phase_all_month_era5(count,
     tick_strings = np.round(tick_locations,2).astype(str)
     tick_strings[0] = '<' + tick_strings[0]
     tick_strings[-1] = '<' + tick_strings[-1] 
-    cbar.ax.set_xticklabels(tick_strings, fontsize = 10) 
+    cbar.ax.set_xticklabels(tick_strings, fontsize = 12) 
     cbar.ax.set_title(cbar_title,size = 25)
-    
+
 
     if savedir != '':
         fig.savefig(savedir + save_name  + '.png', dpi = 500, bbox_inches = 'tight', pad = 0 )
