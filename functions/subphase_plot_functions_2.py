@@ -1149,11 +1149,152 @@ def anomalies_plots_sigle_phase_all_month_era5(count,
         fig.savefig(savedir + save_name  + '.png', dpi = 500, bbox_inches = 'tight', pad = 0 )
         print(save_name + ' has been saved')
 
+        
+
+# THis is for the wind data, it delates half of the points to make the vecotr field no so dense
+def delete_subset(data):
+    data = data[::2]
+    data = data[::2]    
+    data = np.transpose(data)
+    data = data[::2]
+    data = data[::2]
+    data = np.transpose(data)
+    
+    return data
+
+
+
+# For wind fields, to thin them out
+def quiver_values(u_tot, v_tot):
+    u = delete_subset(u_tot.values)
+    v = delete_subset(v_tot.values)
+    
+    lat = u_tot.lat.values[::2][::2]
+    lon = u_tot.lon.values[::2][::2]
+
+    
+    return lat,lon, u, v
+
+        
+ # All months and all extreme indices for a single month of the MJO.
+def anomalies_plots_sigle_phase_all_month_era5_wind(count, uwind, vwind,
+                    l1 = [], vmax = 3,add_white = 0, figsize = (8,12), 
+                    cbar_title = '', savedir = '' , save_name  = ''):
+    
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    from matplotlib.colors import BoundaryNorm
+    import matplotlib.colors as mpc
+    import miscellaneous as misc
+
+    
+    
+    # Plot set up
+    months  = [10,11,12,1,2,3]
+    phases = count.phase.values
+    num_rows = 6
+    fig = plt.figure(figsize = figsize)
+    gs = gridspec.GridSpec(6 + 2,len(phases), height_ratios=[0.2,0.1] + len(months) * [1])
+    gs.update(hspace=0.1, wspace = 0.1)
+    
+    
+
+    fontsize = 15 # Size of the row labels
+    subsize = 15 # Size of the column labels
+    subpad = 20 # The distance in which the column labels appear from the plot
+
+    
+    # Titles
+    plt.suptitle(save_name, fontsize = 30,  y = 0.93)
+    
+    if len(l1) != 0: # This means I am adding my own levels in that I want, nor a preset levels
+        vmax = max(l1)
+    
+    custom_RdBu, levels = anomalie_cbar_1(vmax, l1, add_white)
+    vmin = 1/vmax
+      
+    # Removing the points above and below a certain threshold. Function deals with the problems with doing
+    # this with nan values
+    count = misc.remove_outside_point(count, vmax, vmin)
+    count = misc.apply_masks(count)
+    
+
+    row_num = 0
+
+    first_row_plots = row_num
+    
+    # Looping through the phases, going through columns and then through rows in the loop (e.g looping through model,
+    # then phase
+    for month in months: # These are the rows
+        col_num = 0
+        
+        for phase in phases: # These are the columns
+
+            cm = count.sel(month = month, phase = phase)
+            
+            u = uwind.sel(month = month, phase = phase).u
+            v = vwind.sel(month = month, phase = phase).v
+            lat, lon, u_plot, v_plot = quiver_values(u,v)
+            '''~~~~~~~~~~~~~~~  '''
+            # The + 2 is due to the extra plot to make space between the first plot and the colorbar
+            ax = fig.add_subplot(gs[row_num + 2, col_num], projection  = ccrs.PlateCarree())
+
+            total_plot = cm.plot(ax = ax,vmax = vmax, vmin = vmin,cmap = custom_RdBu, 
+                                    norm = BoundaryNorm(levels, len(levels) - 1),add_colorbar = False)
+            
+            
+            ax.quiver(lon, lat, u_plot,v_plot)
+            ax.set_extent([110, 155, -20,-10])
+            ax.outline_patch.set_visible(False)
+            ax.coastlines(resolution = '50m')
+        
+
+        
+            if row_num == 0:
+                ax.set_title(phase.capitalize(), size = 25)
+            else:
+                ax.set_title('')
+
+            if col_num == 0:
+                ax.annotate(calendar.month_name[month], xy = (-0.12, 0.2), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
+
+
+            col_num += 1
+        row_num += 1
+            
+           
+
+
+    
+    '''~~~~~~~~~~~~~~~  Colorbars'''
     
 
     
- # All months and all extreme indices for a single month of the MJO.
-def anomalies_plots_sigle_phase_all_month_sample_count(count,
+    # The colorbar for the final plot comparing the two
+    axes = plt.subplot(gs[0,0:4])
+    
+    tick_locations = levels[1:-1] # Not including the start and end points so I can add > and < symbols
+
+#     if len(tick_locations) > 20: # There are too many ticks, lets get rid of half
+#         tick_locations = tick_locations[::2]
+
+
+    cbar = plt.colorbar(total_plot, cax = axes , extend = 'neither', orientation = 'horizontal', ticks = tick_locations)
+    
+    tick_strings = np.round(tick_locations,2).astype(str)
+    tick_strings[0] = '<' + tick_strings[0]
+    tick_strings[-1] = '<' + tick_strings[-1] 
+    cbar.ax.set_xticklabels(tick_strings, fontsize = 12) 
+    cbar.ax.set_title(cbar_title,size = 25)
+
+
+    if savedir != '':
+        fig.savefig(savedir + save_name  + '.png', dpi = 500, bbox_inches = 'tight', pad = 0 )
+        print(save_name + ' has been saved')
+
+    
+ # Raw values plot
+def raw_values_plots_all_phase_month(count,
                     step = 10,add_white = 0, figsize = (8,12), vmax = '',vmin = '', 
                     cbar_title = '', savedir = '' , save_name  = ''):
     
@@ -1181,7 +1322,7 @@ def anomalies_plots_sigle_phase_all_month_sample_count(count,
 
     
     # Titles
-    plt.suptitle(save_name, fontsize = 30,  y = 1)
+    plt.suptitle(save_name, fontsize = 30,  y = 0.93)
     
     if vmax == '':
         vmax = np.nanpercentile(count, 99.9)
@@ -1237,17 +1378,7 @@ def anomalies_plots_sigle_phase_all_month_sample_count(count,
             
            
 
- 
-    '''~~~~~~~~~~~~~~~  Seperator between cbar and top plot'''    
-#     axer = fig.add_subplot(gs[1,:], zorder = -100)
-#     axer.spines['top'].set_visible(False)
-#     axer.spines['bottom'].set_visible(False)    
-#     axer.spines['left'].set_visible(False)
-#     axer.spines['right'].set_visible(False)
-#     axer.set_yticklabels('')
-#     axer.set_yticks([])
-#     axer.set_xticklabels('')
-#     axer.set_xticks([])
+
     
     '''~~~~~~~~~~~~~~~  Colorbars'''
     
