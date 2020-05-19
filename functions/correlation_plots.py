@@ -17,7 +17,37 @@ best_blue = '#9bc2d5'
 rechere_red = '#fbc4aa'
 kinda_white = '#f8f8f7' 
 
+def custom_cmap(levels, add_white = 0, extender = 0, cmap_init = 'RdBu'):
+    
+    
+    import matplotlib.colors as mpc
+    
+    cmap = plt.cm.RdBu
 
+    
+    # For this plot, in order for the stippling to be seen, the dark colors at the end need to be clipped off
+    # This is doen be extending the cmap further on either side, then clipping the ends off
+     # This is the extra amount of discrete colors to make
+        # List  of all the colors
+    custom_cmap = plt.cm.get_cmap(cmap_init, len(levels) + extender)(np.arange(len(levels) + extender)) 
+    if extender: # Chopping of some colors that are to dark to see the stippling
+        custom_cmap = custom_cmap[extender:-extender] # CLipping the ends of either side
+    
+    if add_white:
+        upper_mid = np.ceil(len(custom_cmap)/2)
+        lower_mid = np.floor(len(custom_cmap)/2)
+        white = [1,1,1,1]
+
+
+        custom_cmap[int(upper_mid)] = white
+        custom_cmap[int(lower_mid)] = white
+        custom_cmap[int(lower_mid) - 1] = white
+    
+    cmap = mpc.LinearSegmentedColormap.from_list("RdWtBu", custom_cmap,len(levels) + 1) 
+    # Joingi the colormap back together
+    return cmap
+    
+    
 
 def corr_plot(data, sig_data = '', means = '',   vmax = 1, vmin = -1, 
               sig_size = 2.5, extender = 0, add_white = 0,
@@ -193,13 +223,11 @@ def corr_plot_sig_only(data, sig_data = '', means = '',   vmax = 1, vmin = -1,
         
         
 def correlation_plot_single_phase_multi_indinice(data_list_top, titles,phase = 'enhanced',
+                                                 vmax = 0.8, step = 0.1, add_white = 0,
                                               savetitle = '', savedir = ''):
     
-    
-        
-
-    levels = np.arange(-1, 1.2, 0.2)
-#     levels = [-1,-0.8,-0.6, -0.4, -0.2,0, 0.2, 0.4, 0.6, 0.8, 1, 1.2]
+   
+    levels = np.arange(vmin, vmax + step, step)
     
     data_list = []
     
@@ -217,7 +245,8 @@ def correlation_plot_single_phase_multi_indinice(data_list_top, titles,phase = '
     gs = gridspec.GridSpec(rows + 2,cols, height_ratios = [0.2, 0.1] + [1] * rows, hspace = 0.25)
     
 
-    cmap  = plt.get_cmap('RdBu', len(levels))
+#     cmap  = plt.get_cmap('RdBu', len(levels))
+    cmap = custom_cmap(levels, add_white = add_white)
     plt.suptitle(savetitle, fontsize = 15, y = 0.94)
     
     for row,month in enumerate([10,11,12,1,2,3]):
@@ -258,7 +287,7 @@ def correlation_plot_single_phase_multi_indinice(data_list_top, titles,phase = '
         
         
 def correlation_plot_single_phase_multi_indinice_sig_only(data_list_top, sig_list_top, titles,phase = 'enhanced',
-                                                 vmax = 0.8, step = 0.1,
+                                                 vmax = 0.8, step = 0.1, add_white = 0, cmap_init = 'RdBu',
                                               savetitle = '', savedir = ''):
     
     
@@ -285,7 +314,8 @@ def correlation_plot_single_phase_multi_indinice_sig_only(data_list_top, sig_lis
     gs = gridspec.GridSpec(rows + 2,cols, height_ratios = [0.2, 0.1] + [1] * rows, hspace = 0.1, wspace = 0.1)
     
 
-    cmap  = plt.get_cmap('RdBu', len(levels))
+#     cmap  = plt.get_cmap('RdBu', len(levels))
+    cmap = custom_cmap(levels, add_white = add_white, cmap_init = cmap_init)
     plt.suptitle(savetitle, fontsize = 15, y = 0.94)
     
     for row,month in enumerate([10,11,12,1,2,3]):
@@ -299,8 +329,7 @@ def correlation_plot_single_phase_multi_indinice_sig_only(data_list_top, sig_lis
             
             
             ax = fig.add_subplot(gs[row + 2, col], projection = ccrs.PlateCarree())
-            pdata = subdata.precip.plot(ax = ax, add_colorbar = False, cmap = cmap, levels = levels, extend = 'neither')#vmin = vmin, vmax = vmax)
-
+            subdata.precip.plot(ax = ax, add_colorbar = False, cmap = cmap, levels = levels, extend = 'neither')
             ax.outline_patch.set_visible(False)
             ax.coastlines(resolution = '50m')
           
@@ -321,6 +350,8 @@ def correlation_plot_single_phase_multi_indinice_sig_only(data_list_top, sig_lis
                     ticks  = levels, boundaries = levels)
     cbar.ax.set_title('Correlation', fontsize = 12.5)
     
+    
+   
     # Adding in extra space: not sure why this works, but it does???
     ax = plt.subplot(gs[0:cols])
 #     ax.spined

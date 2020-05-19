@@ -61,6 +61,62 @@ def accuracy_plot(data, vmax = 100, vmin = 0,savetitle = '', savedir = ''):
     if savedir != '':
         fig.savefig(savedir + savetitle + '.png', dpi = 150)   
         
+
+        
+def accuracy_plot_all_months(data, vmax = 100, vmin = 0,savetitle = '', savedir = ''):
+
+
+    fig = plt.figure(figsize = (25,20))
+    months = [10,11,12,1,2,3]
+    phases = data.phase.values
+    gs = gridspec.GridSpec(len(months) + 1,len(phases), height_ratios = [0.2] +  len(months) * [1], hspace = 0.4)
+
+    levels = np.arange(vmin, vmax + 10, 10)
+
+    cmap  = plt.get_cmap('RdBu', len(levels))
+    plt.suptitle(savetitle, fontsize = 15, y = 0.95)
+    
+    
+    for row_num,month in enumerate(months):
+        for col_num,phase in enumerate(phases):
+            subdata = data.sel(phase = phase, month = month)
+            ax = fig.add_subplot(gs[row_num + 1, col_num], projection = ccrs.PlateCarree())
+    #         pdata = subdata.precip.plot(ax = ax, add_colorbar = False, cmap = cmap, levels = levels)#vmin = vmin, vmax = vmax)
+
+            X,Y = np.meshgrid(subdata.lon, subdata.lat)
+            pdata = ax.contourf(X,Y,subdata.precip.values, levels = levels, cmap = cmap)
+
+
+            ax.outline_patch.set_visible(False)
+            ax.coastlines(resolution = '50m')
+            if col_num == 0:
+                ax.annotate(calendar.month_name[month], xy = (-0.12, 0), xycoords = 'axes fraction', 
+                            fontsize = 25, rotation = 90)
+                
+            if row_num == 0:
+                ax.set_title(phase.capitalize(), fontsize  = 25)
+            else:
+                ax.set_title('')
+                
+            # Seting the extent or else it cuts off cape york
+            x0 = subdata.lon.values[0]
+            x1 = subdata.lon.values[-1]
+            y0 = subdata.lat.values[0]
+            y1 = subdata.lat.values[-1]
+
+            ax.set_extent([x0,x1,y0,y1 + 1.35])
+
+
+
+    axes = plt.subplot(gs[0:len(phases)])
+    cbar = plt.colorbar(pdata, cax = axes, orientation = 'horizontal',
+                        ticks  = levels, boundaries = levels)
+    tick_labels = [str(i) + '%' for i in levels]
+    cbar.ax.set_xticklabels(tick_labels, fontsize = 15);
+    cbar.ax.set_title('Proportion Correct', fontsize = 20)
+
+    if savedir != '':
+        fig.savefig(savedir + savetitle + '.png', dpi = 800, bbox_inces = 'tight', pad = 0)           
         
         
 def accuracy_plot_single_phase_multi_indinice(data_list_top, titles,phase = 'enhanced',

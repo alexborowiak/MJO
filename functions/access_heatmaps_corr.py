@@ -194,3 +194,72 @@ def corr_heatmap_phase_group(data_tot, month_reverse = 0
     
     if savedir != '':
         fig.savefig(savedir + savename + '.png', dpi = 500, pad = 0, bbox_inches = 'tight')
+        
+        
+        
+        
+        
+
+def corr_heatmap_multi_index(data_tot, titles = [],month_reverse = 0
+                 , vmax = 0.5,step = 0.1, add_white = 0,
+                 savename = '', savedir = ''):
+    
+    
+    # Construction the colormap
+    
+
+    vmin = -vmax
+    levels = np.arange(vmin, vmax + step, step)
+    # The custom cmap is overridden, as the colours didn't matchthe values, and there where some errors with the add_white component
+    # Nevertheless, it has been left in incase I need it in the future
+    cmap = custom_cmap(levels, add_white = add_white)
+#     cmap = plt.cm.get_cmap('RdBu', len(levels) + 1)
+
+    fig = plt.figure(figsize = (8
+, 15))
+    gs = gridspec.GridSpec(4,1, hspace = 0.7,  height_ratios = [0.15,1,1,1])
+
+
+    fig.suptitle(savename)
+
+
+    for plot_num in range(len(data_tot)):
+
+        ax = fig.add_subplot(gs[plot_num + 1])
+
+
+        data = data_tot[plot_num]
+        plot_vals = data.values
+
+        # Making sure the months are in the correct order: not 1,2,3,10,11,12
+        if month_reverse:
+            plot_vals = np.concatenate([plot_vals[:,3:], plot_vals[:,0:3]], axis = 1)
+
+        sns.heatmap(plot_vals.round(2), ax = ax,
+                    cmap = cmap, vmax = vmax, vmin = vmin, cbar = False, 
+                   annot = True, linewidths = 1, linecolor = 'k')
+
+        ax.set_yticklabels([i.capitalize() for i in data.phase.values], rotation = 360);
+        month_names = [calendar.month_name[i] for i in data.month.values]
+        if month_reverse:
+            month_names= np.concatenate([month_names[3:], month_names[0:3]])
+        ax.set_xticklabels(month_names, rotation = 45);
+
+        if len(titles):
+            ax.set_title(titles[plot_num], fontsize = 15, pad = 5)
+
+    # 
+
+#     ax = fig.add_subplot(gs[0])
+#     pdata = ax.imshow(np.transpose(data_tot.values), vmin = vmin, vmax = vmax + step, cmap = cmap)
+
+
+    axes = plt.subplot(gs[0])
+    cbar = mpl.colorbar.ColorbarBase( axes,cmap = cmap, orientation = 'horizontal',
+                        ticks  = levels, boundaries = levels)
+#     cbar = plt.colorbar(pdata, cax = axes, orientation = 'horizontal',
+#                         ticks  = levels, boundaries = levels)
+    cbar.ax.set_title('Correlation', fontsize = 15);
+    
+    if savedir != '':
+        fig.savefig(savedir + savename + '.png', dpi = 500, pad = 0, bbox_inches = 'tight')
