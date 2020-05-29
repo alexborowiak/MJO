@@ -139,7 +139,7 @@ def correlation_calc_and_boxannotate(awap, access,ax, corr_y_val, corr_x_val = 0
     '''Adding in if this corrleation is signivicant or not'''
     
         
-    annotation = ax.annotate(corr_text,xy=(corr_x_val , corr_y_val), fontsize = 12 , 
+    annotation = ax.annotate(corr_text,xy=(corr_x_val , corr_y_val), fontsize = 15 , 
                 xycoords='axes fraction', textcoords='offset points',
                 horizontalalignment='left', verticalalignment='top', bbox = bbox_props)
     
@@ -364,7 +364,7 @@ def comparison_plot(awap, access, month = False,
 '''Phase: This is the comparison plot for PHASES'''
 def anomaly_plot_subphases(awap, access, month = False,
                     l1 = [], vmax = 3,add_white = 0,
-                    figsize = (20,12), 
+                    figsize = (15,12), 
                     cbar_title = '', savename = '',
                           savedir = ''):
     
@@ -386,13 +386,13 @@ def anomaly_plot_subphases(awap, access, month = False,
     num_rows = len(phases)
     fig = plt.figure(figsize = figsize)
     gs = gridspec.GridSpec(num_rows + 2,2, hspace = 0.4, height_ratios=[0.2,0.6] + len(phases) * [1])
-    gs.update(wspace=0.025, hspace=0.0)
+    gs.update(wspace=0.0, hspace=0.0)
     
     
     corr_y_val = 0.65 # This is the initial hieght of the text for the y correlation
-    corr_x_val = -0.3
-    fontsize = 15 # Size of the row labels
-    subsize = 15 # Size of the column labels
+    corr_x_val = -0.12
+    fontsize = 20 # Size of the row labels
+    subsize = 20 # Size of the column labels
     subpad = 20 # The distance in which the column labels appear from the plot
 
     
@@ -441,7 +441,7 @@ def anomaly_plot_subphases(awap, access, month = False,
         if col_num == 0:
             # Inacactive is longer so we want roation
 
-            ax.annotate(phase.capitalize(), rotation = 90,xy=(-0.05,0.2), fontsize = fontsize, 
+            ax.annotate(phase.capitalize(), rotation = 90,xy=(-0.05,0.1), fontsize = fontsize, 
             xycoords='axes fraction', textcoords='offset points',
             horizontalalignment='left', verticalalignment='bottom')
 

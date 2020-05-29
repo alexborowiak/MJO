@@ -154,7 +154,7 @@ def accuracy_plot_single_phase_multi_indinice(data_list_top, titles,phase = 'enh
             ax.coastlines(resolution = '50m')
           
             if col == 0:
-                ax.annotate(calendar.month_name[month], xy = (-0.2, 0.5), xycoords = 'axes fraction', 
+                ax.annotate(calendar.month_name[month], xy = (-0.12, 0.5), xycoords = 'axes fraction', 
                             fontsize = 12.5, rotation = 0)
                 
             if row == 0:

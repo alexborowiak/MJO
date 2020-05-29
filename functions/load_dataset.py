@@ -124,7 +124,7 @@ def load_rmm_access():
     
     
     '''Reading in and restyling rmm'''
-    RMM = xr.open_dataset('/g/data/w40/ab2313/RMM/rmm_access_4.nc')
+    RMM = xr.open_dataset('/g/data/w40/ab2313/RMM/rmm_access_4.nc', chunks = {'time':-1})
     
     # The rmm has one extra ensemble member, I think number 11 is 
     # the ensemble mean
@@ -153,7 +153,7 @@ def load_accessifies_variables():
     awap = load_awap()
     
     access_directory = '/g/data/w40/ab2313/ACCESS_S_1ST_1M_ensembles/'
-    access = load_access(access_directory)
+    access = load_access(access_directory, chunks = 1)
     
     
     # Time matching all of the dataset
@@ -173,4 +173,14 @@ def load_accessifies_variables():
     return awap, access, rmm_obs, rmm_access
     
     
+def load_accessifies_variables2():
     
+    
+    datadir = '/g/data/w40/ab2313/accessified_vars'
+    # Loading in All the Datasets
+    awap = xr.open_dataset(datadir + 'awap.nc')
+    access = xr.open_dataset(datadir + 'access.nc')
+    rmm_obs = xr.open_dataset(datadir + 'rmm_obs.nc')
+    rmm_access = xr.open_dataset(datadir + 'rmm_access.nc')
+    
+    return awap, access, rmm_obs, rmm_access

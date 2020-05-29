@@ -348,7 +348,8 @@ def correlation_plot_single_phase_multi_indinice_sig_only(data_list_top, sig_lis
     import matplotlib as mpl
     cbar = mpl.colorbar.ColorbarBase( axes,cmap = cmap, orientation = 'horizontal',
                     ticks  = levels, boundaries = levels)
-    cbar.ax.set_title('Correlation', fontsize = 12.5)
+    cbar.ax.tick_params(labelsize = 15)
+    cbar.ax.set_title('Correlation', fontsize = 15)
     
     
    
