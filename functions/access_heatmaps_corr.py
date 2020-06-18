@@ -153,7 +153,7 @@ def corr_heatmap_phase_group(data_tot, month_reverse = 0
 
     fig.suptitle(savename)
 
-    state_id = {'All':'All States','NT':'Northern Territory','QLD':'Queensland','WA':'Western Australia'}
+    state_id = {'All':'All States','WA':'Western Australia','NT':'Northern Territory','QLD':'Queensland'}
 
     for plot_num, phase in enumerate(data_tot.phase.values):
 
@@ -170,6 +170,7 @@ def corr_heatmap_phase_group(data_tot, month_reverse = 0
         sns.heatmap(plot_vals.round(2), ax = ax,
                     cmap = cmap, vmax = vmax, vmin = vmin, cbar = False, 
                    annot = True, linewidths = 1, linecolor = 'k')
+        
 
         ax.set_yticklabels(list(state_id.values()), rotation = 360);
         month_names = [calendar.month_name[i] for i in data.month.values]

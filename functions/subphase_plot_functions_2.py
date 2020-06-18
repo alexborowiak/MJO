@@ -1292,10 +1292,11 @@ def anomalies_plots_sigle_phase_all_month_era5_wind(count, uwind, vwind,
         fig.savefig(savedir + save_name  + '.png', dpi = 500, bbox_inches = 'tight', pad = 0 )
         print(save_name + ' has been saved')
 
-    
+
  # Raw values plot
-def raw_values_plots_all_phase_month(count,
-                    step = 10,add_white = 0, figsize = (8,12), vmax = '',vmin = '', 
+def raw_values_plots_all_phase_month_wind(count, uwind, vwind,
+                    step = 10,add_white = 0, figsize = (8,12), vmax = '',vmin = '',
+                                     cmap = 'Blues', extender = 0,
                     cbar_title = '', savedir = '' , save_name  = ''):
     
     import matplotlib.pyplot as plt
@@ -1303,7 +1304,7 @@ def raw_values_plots_all_phase_month(count,
     from matplotlib.colors import BoundaryNorm
     import matplotlib.colors as mpc
     import miscellaneous as misc
-
+    import matplotlib as mpl
     
     
     # Plot set up
@@ -1312,7 +1313,7 @@ def raw_values_plots_all_phase_month(count,
     num_rows = 6
     fig = plt.figure(figsize = figsize)
     gs = gridspec.GridSpec(6 + 2,len(phases), height_ratios=[0.2,0.1] + len(months) * [1])
-    gs.update(hspace=0.1, wspace = 0)
+    gs.update(hspace=0.1, wspace = 0.1)
     
     
 
@@ -1330,7 +1331,204 @@ def raw_values_plots_all_phase_month(count,
         vmin = np.nanpercentile(count, 0.1)
     levels = np.arange(vmin, vmax + step, step)
     
-    cmap = plt.get_cmap('Blues', len(levels))
+    
+    
+    # Creating a colorbar with the levels where you want them
+    # extener will clip off the darker colours
+    custom_RdBu = plt.cm.get_cmap(cmap, len(levels) + extender)(np.arange(len(levels) + extender)) 
+#     custom_RdBu = plt.cm.get_cmap("RdBu",len(levels))(np.arange(len(levels) ))
+
+    if extender: # Chopping of some colors that are to dark to see the stippling
+        custom_RdBu = custom_RdBu[extender:-extender] # CLipping the ends of either side
+    
+#     '''Adding White into the middle'''
+#     # Find the middle of the color bar
+    if add_white:
+        upper_mid = np.ceil(len(custom_RdBu)/2)
+        lower_mid = np.floor(len(custom_RdBu)/2)
+        white = [1,1,1,1]
+
+        custom_RdBu[int(upper_mid)] = white
+        custom_RdBu[int(lower_mid)] = white
+        custom_RdBu[int(lower_mid) - 1] = white
+    
+    
+    cmap = mpl.colors.LinearSegmentedColormap.from_list("RdWtBu", custom_RdBu,len(levels))
+    
+    
+    
+    cmap = plt.get_cmap(cmap, len(levels))
+      
+    # Removing the points above and below a certain threshold. Function deals with the problems with doing
+    # this with nan values
+    count = misc.remove_outside_point(count, vmax, vmin)
+    count = misc.apply_masks(count)
+    
+
+    row_num = 0
+
+    first_row_plots = row_num
+    
+    # Looping through the phases, going through columns and then through rows in the loop (e.g looping through model,
+    # then phase
+    for month in months: # These are the rows
+        col_num = 0
+        
+        for phase in phases: # These are the columns
+
+            cm = count.sel(month = month, phase = phase)
+            
+                       
+            u = uwind.sel(month = month, phase = phase).u
+            v = vwind.sel(month = month, phase = phase).v
+            lat, lon, u_plot, v_plot = quiver_values(u,v)
+
+   
+ 
+    
+
+            '''~~~~~~~~~~~~~~~  '''
+            # The + 2 is due to the extra plot to make space between the first plot and the colorbar
+            ax = fig.add_subplot(gs[row_num + 2, col_num], projection  = ccrs.PlateCarree())
+            total_plot = cm.plot(ax = ax,vmax = vmax, vmin = vmin,cmap = cmap, 
+                                    levels = levels,add_colorbar = False)
+            
+            
+            
+            qiv_plot = ax.quiver(lon, lat, u_plot,v_plot, scale = 40, scale_units = 'inches')
+            ax.set_extent([110, 155, -20,-10])
+            ax.outline_patch.set_visible(False)
+            ax.coastlines(resolution = '50m')
+            
+            magnitude = np.sqrt(u.values ** 2 + v.values **2)
+            max_mag = int(np.round(np.max(magnitude),0))
+            mid_mag = int(np.round(np.median(magnitude),0))
+            
+            ax.quiverkey(qiv_plot, X = .85, Y=1.1, U = max_mag,
+             label= f'max: {max_mag} m/s', labelpos='E')
+#             ax.quiverkey(qiv_plot, X=0.8, Y=1.1, U = mid_mag,
+#              label= f'{mid_mag} m/s', labelpos='E')
+            
+     
+        
+
+            ax.outline_patch.set_visible(False)
+            ax.coastlines(resolution = '50m')
+        
+
+        
+            if row_num == 0:
+                ax.set_title(phase.capitalize(), size = 25)
+            else:
+                ax.set_title('')
+
+            if col_num == 0:
+                ax.annotate(calendar.month_name[month],va = 'center', xy = (-0.12,0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
+
+
+            col_num += 1
+        row_num += 1
+            
+           
+
+
+    
+    '''~~~~~~~~~~~~~~~  Colorbars'''
+    
+
+    
+    # The colorbar for the final plot comparing the two
+    axes = plt.subplot(gs[0,0:4])
+    
+    tick_locations = levels[1:-1] # Not including the start and end points so I can add > and < symbols
+
+#     if len(tick_locations) > 20: # There are too many ticks, lets get rid of half
+#         tick_locations = tick_locations[::2]
+
+
+    cbar = plt.colorbar(total_plot, cax = axes , extend = 'neither', orientation = 'horizontal', ticks = tick_locations)
+    
+    tick_strings = np.round(tick_locations,2).astype(str)
+    tick_strings[0] = '<' + tick_strings[0]
+    tick_strings[-1] = '<' + tick_strings[-1] 
+    cbar.ax.set_xticklabels(tick_strings, fontsize = 15
+) 
+    cbar.ax.set_title(cbar_title,size = 25)
+    
+
+    if savedir != '':
+        fig.savefig(savedir + save_name  + '.png', dpi = 500, bbox_inches = 'tight', pad = 0 )
+        print(save_name + ' has been saved')
+
+         
+        
+        
+        
+ # Raw values plot
+def raw_values_plots_all_phase_month(count,
+                    step = 10,add_white = 0, figsize = (8,12), vmax = '',vmin = '',
+                                     cmap = 'Blues', extender = 0,
+                    cbar_title = '', savedir = '' , save_name  = ''):
+    
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    from matplotlib.colors import BoundaryNorm
+    import matplotlib.colors as mpc
+    import miscellaneous as misc
+    import matplotlib as mpl
+    
+    
+    # Plot set up
+    months  = [10,11,12,1,2,3]
+    phases = count.phase.values
+    num_rows = 6
+    fig = plt.figure(figsize = figsize)
+    gs = gridspec.GridSpec(6 + 2,len(phases), height_ratios=[0.2,0.1] + len(months) * [1])
+    gs.update(hspace = 0.2, wspace = 0)
+    
+    
+
+    fontsize = 15 # Size of the row labels
+    subsize = 15 # Size of the column labels
+    subpad = 20 # The distance in which the column labels appear from the plot
+
+    
+    # Titles
+    plt.suptitle(save_name, fontsize = 30,  y = 0.93)
+    
+    if vmax == '':
+        vmax = np.nanpercentile(count, 99.9)
+    if vmin == '':
+        vmin = np.nanpercentile(count, 0.1)
+    levels = np.arange(vmin, vmax + step, step)
+    
+    
+    
+    # Creating a colorbar with the levels where you want them
+    # extener will clip off the darker colours
+    custom_RdBu = plt.cm.get_cmap(cmap, len(levels) + extender)(np.arange(len(levels) + extender)) 
+#     custom_RdBu = plt.cm.get_cmap("RdBu",len(levels))(np.arange(len(levels) ))
+
+    if extender: # Chopping of some colors that are to dark to see the stippling
+        custom_RdBu = custom_RdBu[extender:-extender] # CLipping the ends of either side
+    
+#     '''Adding White into the middle'''
+#     # Find the middle of the color bar
+    if add_white:
+        upper_mid = np.ceil(len(custom_RdBu)/2)
+        lower_mid = np.floor(len(custom_RdBu)/2)
+        white = [1,1,1,1]
+
+        custom_RdBu[int(upper_mid)] = white
+        custom_RdBu[int(lower_mid)] = white
+        custom_RdBu[int(lower_mid) - 1] = white
+    
+    
+    cmap = mpl.colors.LinearSegmentedColormap.from_list("RdWtBu", custom_RdBu,len(levels))
+    
+    
+    
+    cmap = plt.get_cmap(cmap, len(levels))
       
     # Removing the points above and below a certain threshold. Function deals with the problems with doing
     # this with nan values
@@ -1370,7 +1568,7 @@ def raw_values_plots_all_phase_month(count,
                 ax.set_title('')
 
             if col_num == 0:
-                ax.annotate(calendar.month_name[month], xy = (-0.12, 0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
+                ax.annotate(calendar.month_name[month],va = 'center', xy = (-0.12, 0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
 
 
             col_num += 1
@@ -1398,7 +1596,7 @@ def raw_values_plots_all_phase_month(count,
     tick_strings = np.round(tick_locations,2).astype(str)
     tick_strings[0] = '<' + tick_strings[0]
     tick_strings[-1] = '<' + tick_strings[-1] 
-    cbar.ax.set_xticklabels(tick_strings, fontsize = 10) 
+    cbar.ax.set_xticklabels(tick_strings, fontsize = 15) 
     cbar.ax.set_title(cbar_title,size = 25)
     
 
