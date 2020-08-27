@@ -170,6 +170,7 @@ def anomalies_plots_stippled(datafile,vmax = 3, title = '', cbar_title = '',cbar
     if savedir != '':
         fig.savefig(savedir + title + '.png', dpi = 400)
         print('saving:' + title)
+        
 
     
     
@@ -871,7 +872,7 @@ def anomalies_plots_sigle_phase_all_month(count, int_, prop, phase = 'enhanced',
     tick_strings = np.round(tick_locations,2).astype(str)
     tick_strings[0] = '<' + tick_strings[0]
     tick_strings[-1] = '<' + tick_strings[-1] 
-    cbar.ax.set_xticklabels(tick_strings, fontsize = 10) 
+    cbar.ax.set_xticklabels(tick_strings, fontsize = 15) 
     cbar.ax.set_title(cbar_title,size = 25)
     
 
@@ -958,12 +959,12 @@ def anomalies_plots_sigle_phase_all_month_different_cbar(count, int_, prop, phas
 
         
         if row_num == 0:
-            ax.set_title('Extreme Frequency', size = 25)
+            ax.set_title('Number of Raindays', size = 25)
         else:
             ax.set_title('')
             
         if col_num == 0:
-            ax.annotate(calendar.month_name[month], xy = (-0.12, 0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
+            ax.annotate(calendar.month_name[month], va = 'center',xy = (-0.12, 0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
             
         
         col_num += 1        
@@ -978,7 +979,7 @@ def anomalies_plots_sigle_phase_all_month_different_cbar(count, int_, prop, phas
         ax.coastlines(resolution = '50m')
         
         if row_num == 0:
-            ax.set_title('Extreme Intensity', size = 25)
+            ax.set_title('Mean Intensity', size = 25)
         else:
             ax.set_title('')
         
@@ -995,7 +996,7 @@ def anomalies_plots_sigle_phase_all_month_different_cbar(count, int_, prop, phas
         ax.coastlines(resolution = '50m')
         
         if row_num == 0:
-            ax.set_title('Extreme Proportion', size = 25)
+            ax.set_title('Proportion of Total Rainfall', size = 25)
         else:
             ax.set_title('')
         
@@ -1031,11 +1032,115 @@ def cbar_helper(axes, levels, total_plot, cbar_title):
     tick_strings = np.round(tick_locations,2).astype(str)
     tick_strings[0] = '<' + tick_strings[0]
     tick_strings[-1] = '<' + tick_strings[-1] 
-    cbar.ax.set_xticklabels(tick_strings, fontsize = 10) 
-    cbar.ax.set_title(cbar_title,size = 25)
+    cbar.ax.set_xticklabels(tick_strings, fontsize = 12, rotation = 45) 
+    cbar.ax.set_title(cbar_title,size = 15)
         
         
+# All months and all extreme indices for a single month of the MJO.
+def anomalies_plots_single_el_nino(data,
+                    l1 = [], vmax = 3,add_white = 0, figsize = (8,12), 
+                    cbar_title = '', savedir = '' , save_name  = ''):
+    
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    from matplotlib.colors import BoundaryNorm
+    import matplotlib.colors as mpc
+    import miscellaneous as misc
+
+    
+    
+    # Plot set up
+    months  = [10,11,12,1,2,3]
+    num_rows = len(months)
+    fig = plt.figure(figsize = figsize)
+    gs = gridspec.GridSpec(num_rows + 2,2, height_ratios=[0.2,0.1] + len(months) * [1])
+    gs.update(hspace=0.3, wspace = 0.1)
+    
+    
+
+    fontsize = 15 # Size of the row labels
+    subsize = 15 # Size of the column labels
+    subpad = 20 # The distance in which the column labels appear from the plot
+
+    
+    # Titles
+#     plt.suptitle(save_name, fontsize = 30,  y = 1)
+   
+    
+    custom_RdBu, levels = anomalie_cbar_1(vmax, l1, add_white)
+    vmin = 1/vmax
+
+      
+    # Removing the points above and below a certain threshold. Function deals with the problems with doing
+    # this with nan values
+    data = misc.remove_outside_point(data, vmax, vmin)
+    data = misc.apply_masks(data)
+  
+    # Initalising the row and column placements
+
+    row_num = 0
+
+    first_row_plots = row_num
+    
+    # Looping through the phases, going through columns and then through rows in the loop (e.g looping through model,
+    # then phase
+    for month in months:
+
+        cm = data.sel(month = month)
+        col_num = 0
         
+        '''~~~~~~~~~~~~~~~  '''
+        # The + 2 is due to the extra plot to make space between the first plot and the colorbar
+        ax = fig.add_subplot(gs[row_num + 2, col_num], projection  = ccrs.PlateCarree())
+        count_plot = cm.sel(phase = 'enhanced').precip.plot(ax = ax,vmax = vmax, vmin = vmin,cmap = custom_RdBu, 
+                                norm = BoundaryNorm(levels, len(levels) - 1),add_colorbar = False)
+         
+        ax.outline_patch.set_visible(False)
+        ax.coastlines(resolution = '50m')
+        
+
+        
+        if row_num == 0:
+            ax.set_title('Enhanced', size = 25)
+        else:
+            ax.set_title('')
+            
+        if col_num == 0:
+            ax.annotate(calendar.month_name[month], va = 'center',xy = (-0.12, 0.5), xycoords = 'axes fraction', fontsize = 25, rotation = 90)
+            
+        
+        col_num += 1        
+        
+        '''~~~~~~~~~~~~~~~  '''
+        # The + 2 is due to the extra plot to make space between the first plot and the colorbar
+        ax = fig.add_subplot(gs[row_num + 2, col_num], projection  = ccrs.PlateCarree())
+        cm.sel(phase = 'suppressed').precip.plot(ax = ax,vmax = vmax, vmin = vmin,cmap = custom_RdBu, 
+                                norm = BoundaryNorm(levels, len(levels) - 1),add_colorbar = False)
+         
+        ax.outline_patch.set_visible(False)
+        ax.coastlines(resolution = '50m')
+        
+        if row_num == 0:
+            ax.set_title('Suppressed', size = 25)
+        else:
+            ax.set_title('')
+        
+    
+        row_num += 1
+ 
+    '''~~~~~~~~~~~~~~~  Colorbars'''
+    
+
+    
+    # The colorbar for the final plot comparing the two
+    axes = plt.subplot(gs[0,:])
+    cbar_helper(axes, levels, count_plot, cbar_title)
+
+
+    if savedir != '':
+        fig.savefig(savedir + save_name  + '.png', dpi = 300, bbox_inches = 'tight', pad = 0)
+        print(save_name + ' has been saved')    
+                
         
         
  # All months and all extreme indices for a single month of the MJO.
@@ -1466,7 +1571,7 @@ def raw_values_plots_all_phase_month_wind(count, uwind, vwind,
         
  # Raw values plot
 def raw_values_plots_all_phase_month(count,
-                    step = 10,add_white = 0, figsize = (8,12), vmax = '',vmin = '',
+                    step = 10,add_white = 0, figsize = (8,12), vmax = '',vmin = '', phases = '',
                                      cmap = 'Blues', extender = 0,
                     cbar_title = '', savedir = '' , save_name  = ''):
     
@@ -1480,7 +1585,8 @@ def raw_values_plots_all_phase_month(count,
     
     # Plot set up
     months  = [10,11,12,1,2,3]
-    phases = count.phase.values
+    if phases == '':
+        phases = count.phase.values
     num_rows = 6
     fig = plt.figure(figsize = figsize)
     gs = gridspec.GridSpec(6 + 2,len(phases), height_ratios=[0.2,0.1] + len(months) * [1])
